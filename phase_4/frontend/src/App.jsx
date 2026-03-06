@@ -44,7 +44,8 @@ const App = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/chat', { query: input });
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
+      const response = await axios.post(`${backendUrl}/api/chat`, { query: input });
       const botMsg = { role: 'assistant', content: response.data.answer };
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {

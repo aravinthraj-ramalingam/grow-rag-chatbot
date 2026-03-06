@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Tata Mutual Fund RAG API - Phase 4")
 
-# Configure CORS for React Frontend
+# Configure CORS for React Frontend (Railway + Vercel)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["*"], # In production, restrict this to your specific Vercel URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

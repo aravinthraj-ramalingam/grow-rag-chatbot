@@ -1,6 +1,6 @@
 import streamlit as st
-import requests
 import json
+from phase_3.rag_engine import RAGChatbot
 
 # Setup Page
 st.set_page_config(page_title="Groww MF Premium", page_icon="💎", layout="centered")
@@ -165,8 +165,16 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-# Backend URL
-BACKEND_URL = "http://localhost:8000/chat"
+# Initialize RAG Engine
+@st.cache_resource
+def get_bot():
+    try:
+        return RAGChatbot()
+    except Exception as e:
+        st.error(f"Failed to initialize AI Engine: {e}")
+        return None
+
+bot = get_bot()
 
 # Initialize Chat History
 if "messages" not in st.session_state:
@@ -186,17 +194,16 @@ if prompt := st.chat_input("Type / for commands or ask a question..."):
 
     # Get Bot Response
     with st.chat_message("assistant"):
-        try:
-            with st.spinner("Analyzing context..."):
-                response = requests.post(BACKEND_URL, json={"query": prompt})
-                if response.status_code == 200:
-                    answer = response.json()["answer"]
+        if bot is None:
+            st.error("Engine offline. Please check Google API Key configuration.")
+        else:
+            try:
+                with st.spinner("Analyzing context..."):
+                    answer = bot.ask(prompt)
                     st.markdown(answer)
                     st.session_state.messages.append({"role": "assistant", "content": answer})
-                else:
-                    st.error(f"Error: {response.status_code}")
-        except Exception as e:
-            st.error("Engine offline. Please start app_backend.py")
+            except Exception as e:
+                st.error(f"Error processing request: {e}")
 
 # Footer Disclaimer
 st.markdown("""
